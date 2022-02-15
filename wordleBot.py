@@ -175,95 +175,52 @@ def instantWordle(words, scored_base, sol, grade_type):
             break
         letters_in = {}
         
-        '''
-        #First for-loop responsible for evaluating a guess
-        for j in range(len(guess)):
-            #is this letter in the word and in the right spot?
-            if guess[j] == sol[j]:
-                clues["green"][j] = sol[j]
-                guessColor[j] = "G"
-                if guess[j] not in letters_in:
-                    letters_in[guess[j]] = 1
-                else:
-                    letters_in[guess[j]] += 1
         
-        #Second for-loop responsible for evaluating a guess
-        j = 0
-        for j in range(len(guess)):
-            #is this letter not in the guess? add it to the blacklist
-            if guess[j] not in sol and guess[j] not in clues["black"]:
-                clues["black"].append(guess[j])
-                guessColor[j] = "B"
-            elif guess[j] not in sol:
-                guessColor[j] = "B"
-            
-            if guess[j] in sol and guess[j] != sol[j]:
-                
-                if guess[j] not in clues["eliminatedIndices"]:
-                    clues["eliminatedIndices"] = []
-                    clues["eliminatedIndices"].append(j)
-                    guessColor[j] = "Y"
-                else:
-                    clues["eliminatedIndices"].append(j)
-                
-                if guess[j] not in letters_in:
-                    letters_in[guess[j]] = 1
-                    guessColor[j] = "Y"
-                elif letters_in[guess[j]] < sol.count(guess[j]):
-                    letters_in[guess[j]] += 1
-                    guessColor[j] = "Y"
-                else:
-                    guessColor[j] = "B"
-                    
-        guessesColors.append("".join(guessColor))
-        #Guess should be fully evaluated by now
-        '''
         guessesColors.append("".join(colorEvaluator(guess, clues, letters_in, sol)[0]))
         
         #filter possibilities out of word list
-        if True:
-            j = 0
-            for j in range(len(words)):
-                word_check = words[j].lower()
-                wordQuality = True
+        j = 0
+        for j in range(len(words)):
+            word_check = words[j].lower()
+            wordQuality = True
+            
+            for k in range(len(word_check)):
+                if clues["green"][k] != "-1" and clues["green"][k] != word_check[k]:
+                    wordQuality = False
+                    break
                 
-                for k in range(len(word_check)):
-                    if clues["green"][k] != "-1" and clues["green"][k] != word_check[k]:
+                if word_check[k] in clues["black"]:
+                    wordQuality = False
+                    break
+                
+                if word_check[k] in letters_in:
+                    if word_check.count(word_check[k]) < letters_in[word_check[k]]:
                         wordQuality = False
                         break
+                
                     
-                    if word_check[k] in clues["black"]:
-                        wordQuality = False
-                        break
-                    
-                    if word_check[k] in letters_in:
-                        if word_check.count(word_check[k]) < letters_in[word_check[k]]:
+                if word_check[k] in letters_in:
+                    breakAgain = False
+                    for l in range(i + 1):
+                        if guessesColors[l][k].lower() == "y" and guesses[l][k].lower() == word_check[k]:
                             wordQuality = False
+                            breakAgain = True
                             break
                     
-                        
-                    if word_check[k] in letters_in:
-                        breakAgain = False
-                        for l in range(i + 1):
-                            if guessesColors[l][k].lower() == "y" and guesses[l][k].lower() == word_check[k]:
-                                wordQuality = False
-                                breakAgain = True
-                                break
-                        
-                        if breakAgain:
-                            break
-                
-                for k in letters_in:
-                    if k not in word_check:
-                        wordQuality = False
+                    if breakAgain:
                         break
-                
-                
-                if not wordQuality:
-                    if word_check in scored_base:
-                        scored_base.pop(word_check)
-                    if word_check in wordsCopy:
-                        wordsCopy.remove(word_check)
+            
+            for k in letters_in:
+                if k not in word_check:
+                    wordQuality = False
+                    break
+            
+            
+            if not wordQuality:
+                if word_check in scored_base:
+                    scored_base.pop(word_check)
+                if word_check in wordsCopy:
+                    wordsCopy.remove(word_check)
         
                     
                     
