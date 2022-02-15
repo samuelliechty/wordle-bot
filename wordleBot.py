@@ -422,11 +422,11 @@ if __name__ == "__main__":
                 if play_type[0].lower() == "i":
                     puzzle_solution = input("Input today's five-letter Wordle solution: ")
                     if score_type[0].lower() == "b":
-                        print(instantWordle(thisDictionary, baseGraded, puzzle_solution, score_type))
+                        instantWordle(thisDictionary, baseGraded, puzzle_solution, score_type)
                     if score_type[0].lower() == "e":
                         instantWordle(thisDictionary, extraGraded, puzzle_solution, score_type)
                     if score_type[0].lower() == "m":
-                        print(instantWordle(thisDictionary, mixedGraded, puzzle_solution, score_type))
+                        instantWordle(thisDictionary, mixedGraded, puzzle_solution, score_type)
             #playWordle(thisDictionary, baseGraded, extraGraded, mixedGraded)
         else:
             break
