@@ -400,7 +400,7 @@ if __name__ == "__main__":
             score_type = ""
             play_type = ""
             
-            score_type = input("Select score type (input B for Base, E for Extra, M for Mixed, S for Smart): ")
+            score_type = input("Select score type (input B for Base, E for Extra, M for Mixed): ")
             play_type = input("Select play type (input I for Instant, W to play With bot): ")
             
             if not doneAnalysis:
