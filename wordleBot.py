@@ -29,6 +29,9 @@ def letterDataCollection(dictionary):
         for j in range(len(current_word)): #visit every letter of current word
             letter = current_word[j] #hold current letter of current word
             
+            #alreadyCounted = []
+            #if letter not in alreadyCounted:
+                #alreadyCounted.append(letter)
             #if a letter is uppercase, make it lowercase
             if letter.isupper():
                 letter = letter.lower()
@@ -164,7 +167,7 @@ def instantWordle(words, scored_base, sol, grade_type):
     clues["black"] = []
     clues["eliminatedIndices"] = {}
     
-    for i in range(6):
+    for i in range(99):
         guess = max(scored_base, key=scored_base.get)
         guesses.append(guess)
         scored_base.pop(guess)
@@ -244,8 +247,8 @@ def instantWordle(words, scored_base, sol, grade_type):
             reGrade = []
             for key_ in scored_base.keys():
                 reGrade.append(key_)
-            letterData_ = holdData
-            #letterData_ = letterDataCollection(reGrade)[0]
+            #letterData_ = holdData
+            letterData_ = letterDataCollection(reGrade)[0] #I CANNOT BELIEVE THIS LINE WAS COMMENTED OUT
             charOccurance_ = letterDataCollection(reGrade)[1]
             temp_base = baseGrading(reGrade, letterData_)
             temp_extra = extraGrading(reGrade, letterData_, charOccurance_)
@@ -264,7 +267,7 @@ def instantWordle(words, scored_base, sol, grade_type):
         for q in range(len(guesses)):
             print(guesses[q].upper() + " - " + guessesColors[q])
     
-    if solved:
+    if True:
         return len(guesses)
     else:
         return 0
@@ -322,7 +325,7 @@ def collectStats(_dictionary_, _letterData_, _charOccurance_, gradeWhat):
     algorithmGuessDistribution = [{},{},{}]
     algorithmGuessesPerWord = [{},{},{}]
     if gradeWhat =="b":
-        for n in range(7):
+        for n in range(99):
             algorithmGuessDistribution[0][n] = 0
         for j in range(len(_dictionary_)):
             baseGraded = baseGrading(_dictionary_, _letterData_)
@@ -330,7 +333,7 @@ def collectStats(_dictionary_, _letterData_, _charOccurance_, gradeWhat):
             algorithmGuessDistribution[0][solvedIn] += 1
             algorithmGuessesPerWord[0][_dictionary_[j]] = solvedIn
     elif gradeWhat =="e":
-        for n in range(7):
+        for n in range(99):
             algorithmGuessDistribution[0][n] = 0
         for j in range(len(_dictionary_)):
             extraGraded = extraGrading(_dictionary_, _letterData_, _charOccurance_)
@@ -338,7 +341,7 @@ def collectStats(_dictionary_, _letterData_, _charOccurance_, gradeWhat):
             algorithmGuessDistribution[0][solvedIn] += 1
             algorithmGuessesPerWord[0][_dictionary_[j]] = solvedIn
     elif gradeWhat =="m":
-        for n in range(7):
+        for n in range(99):
             algorithmGuessDistribution[0][n] = 0
         for j in range(len(_dictionary_)):
             baseGraded = baseGrading(_dictionary_, _letterData_)
