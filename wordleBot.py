@@ -4,6 +4,9 @@ Created on Thu Feb 10 04:36:25 2022
 
 @author: Samuel Liechty
 """
+import time
+import random
+
 def trimDictionary(dictionary):
     #initialize list of five letter words
     words_five = []
@@ -84,6 +87,34 @@ def letterDataCollection(dictionary):
     
     return returnThis #returns a list with overall letter data in index 0 and character occurance data in index 1
 
+def smartGrading(dictionary, clues, letters_in):
+    #colorEvaluator()
+    grid = {}
+    graded = {}
+    dictionary2 = dictionary.copy()
+    for solution in dictionary:
+        for word in dictionary2:
+            if word not in graded:
+                graded[word] = 0
+            colorGraded = colorEvaluator(word, clues, letters_in, solution)[0]
+            for i in range(len(colorGraded)):
+                gradedLetter = 0
+                if colorGraded[i].lower() == "y":
+                    gradedLetter = 1
+                elif colorGraded[i].lower() == "g":
+                    gradedLetter = 2
+                graded[word] += gradedLetter
+            '''
+            if word not in grid:
+                grid[word] =  {}
+            if colorEvaluator(word, clues, letters_in, solution)[0] not in grid[word]:
+                grid[word][colorEvaluator(word, clues, letters_in, solution)[0]] = 1
+            else:
+                grid[word][colorEvaluator(word, clues, letters_in, solution)[0]] += 1
+            '''
+    return graded
+    
+
 def baseGrading(dictionary, data):
     #initalize variables
     scored_words_five = {}
@@ -133,7 +164,7 @@ def mixedGrading(dictionary, scored_words_five, scored_extra_words_five):
     #initialize variables
     scored_mixed_words_five = {}
     scored_mixed_words_five["xxxxx"] = -1
-
+    
     for i in range(len(dictionary)):
         current_word = dictionary[i]
         scored_mixed_words_five[current_word] = scored_words_five[current_word] + scored_extra_words_five[current_word]
@@ -168,7 +199,14 @@ def instantWordle(words, scored_base, sol, grade_type):
     clues["eliminatedIndices"] = {}
     
     for i in range(99):
-        guess = max(scored_base, key=scored_base.get)
+        if len(scored_base) == 0:
+            print(guesses[len(guesses) - 1])
+            print(len(guesses))
+        guess = ""
+        if grade_type[0].lower() == "r" and i == 0:
+            guess = random.choice(list(scored_base.keys()))
+        else:
+            guess = max(scored_base, key=scored_base.get)
         guesses.append(guess)
         scored_base.pop(guess)
         guessColor = ["x", "x", "x", "x", "x"]
@@ -200,8 +238,7 @@ def instantWordle(words, scored_base, sol, grade_type):
                     if word_check.count(word_check[k]) < letters_in[word_check[k]]:
                         wordQuality = False
                         break
-                
-                    
+                 
                 if word_check[k] in letters_in:
                     breakAgain = False
                     for l in range(i + 1):
@@ -218,16 +255,12 @@ def instantWordle(words, scored_base, sol, grade_type):
                     wordQuality = False
                     break
             
-            
             if not wordQuality:
                 if word_check in scored_base:
                     scored_base.pop(word_check)
                 if word_check in wordsCopy:
                     wordsCopy.remove(word_check)
         
-                    
-                    
-                    
         #regrade words
         if grade_type.lower() == "b":
             reGrade = []
@@ -243,7 +276,7 @@ def instantWordle(words, scored_base, sol, grade_type):
             letterData_ = holdData
             charOccurance_ = letterDataCollection(reGrade)[1]
             scored_base = extraGrading(reGrade, letterData_, charOccurance_)
-        elif grade_type.lower() == "m":
+        elif grade_type.lower() == "m" or grade_type.lower() == "r":
             reGrade = []
             for key_ in scored_base.keys():
                 reGrade.append(key_)
@@ -253,7 +286,120 @@ def instantWordle(words, scored_base, sol, grade_type):
             temp_base = baseGrading(reGrade, letterData_)
             temp_extra = extraGrading(reGrade, letterData_, charOccurance_)
             scored_base = mixedGrading(reGrade, temp_base, temp_extra)
+        elif grade_type.lower() == "s": #why doesn't this work
+            reGrade = []
+            for key_ in scored_base.keys():
+                reGrade.append(key_)
+            scored_base = smartGrading(reGrade, clues, letters_in)
+            print(scored_base)
+                
+    if solved:
+        print("Puzzle solved in "+str(len(guesses)) + " guesses!")
+        print("Here is the line:")
+        for q in range(len(guesses)):
+            print(guesses[q].upper() + " - " + guessesColors[q])
             
+    else:
+        print("Failed to solve puzzle.")
+        print("This was the line:")
+        for q in range(len(guesses)):
+            print(guesses[q].upper() + " - " + guessesColors[q])
+    
+    if True:
+        return len(guesses)
+    else:
+        return 0
+
+def smartInstantWordle(words, scored_base, sol):
+    wordsCopy = words.copy()
+    holdData = letterDataCollection(words)[0]
+    
+    if sol not in scored_base:
+        print("Uh oh, you've inputted a word that does not exist.\nPlease try again and input a valid five-letter word.")
+        print(sol)
+        return 0
+    while True:
+        if len(sol) != 5:
+            print("Solution must be five letters long")
+            sol = input("Input today's five-letter Wordle solution: ")
+        else:
+            break
+    
+    guesses = []
+    guessesColors = []
+    solved = False
+    clues = {}
+    clues["yellowBlocked"] = []
+    clues["yellow"] = {}
+    clues["green"] = ["-1", "-1", "-1", "-1", "-1"]
+    clues["yellowGuesses"] = {}
+    clues["black"] = []
+    clues["eliminatedIndices"] = {}
+    
+    for i in range(99):
+        if len(scored_base) == 0:
+            print(guesses[len(guesses) - 1])
+            print(len(guesses))
+        guess = max(scored_base, key=scored_base.get)
+        guesses.append(guess)
+        scored_base.pop(guess)
+        guessColor = ["x", "x", "x", "x", "x"]
+        if guess == sol:
+            solved = True
+            guessesColors.append("GGGGG")
+            break
+        letters_in = {}
+        
+        
+        guessesColors.append("".join(colorEvaluator(guess, clues, letters_in, sol)[0]))
+        
+        #filter possibilities out of word list
+        j = 0
+        for j in range(len(wordsCopy)):
+            word_check = wordsCopy[j].lower()
+            wordQuality = True
+            
+            for k in range(len(word_check)):
+                if clues["green"][k] != "-1" and clues["green"][k] != word_check[k]:
+                    wordQuality = False
+                    break
+                
+                if word_check[k] in clues["black"]:
+                    wordQuality = False
+                    break
+                
+                if word_check[k] in letters_in:
+                    if word_check.count(word_check[k]) < letters_in[word_check[k]]:
+                        wordQuality = False
+                        break
+                 
+                if word_check[k] in letters_in:
+                    breakAgain = False
+                    for l in range(i + 1):
+                        if guessesColors[l][k].lower() == "y" and guesses[l][k].lower() == word_check[k]:
+                            wordQuality = False
+                            breakAgain = True
+                            break
+                    
+                    if breakAgain:
+                        break
+            
+            for k in letters_in:
+                if k not in word_check:
+                    wordQuality = False
+                    break
+            
+            if not wordQuality:
+                if word_check in scored_base:
+                    scored_base.pop(word_check)
+        
+        #regrade words
+        reGrade = []
+        for key_ in scored_base.keys():
+            reGrade.append(key_)
+        scored_base = smartGrading(reGrade, clues, letters_in)
+        wordsCopy = reGrade
+        print(scored_base)
                 
     if solved:
         print("Puzzle solved in "+str(len(guesses)) + " guesses!")
@@ -403,13 +549,14 @@ if __name__ == "__main__":
             score_type = ""
             play_type = ""
             
-            score_type = input("Select score type (input B for Base, E for Extra, M for Mixed): ")
+            score_type = input("Select score type (input B for Base, E for Extra, M for Mixed, R for McKenna's Version): ")
             play_type = input("Select play type (input I for Instant, W to play With bot): ")
             
             if not doneAnalysis:
                 doAnalysis = input("Do analysis (this will take a while), Y for Yes, N for No: ")
                 if doAnalysis != "" and doAnalysis[0].lower() == "y":
                     analysisType = input("Which grading types? B for Base, E for Extra, M for Mixed, A for All: ")
+                    
                     if analysisType != "" and analysisType[0].lower() == "b":
                         statsCollected = collectStats(thisDictionary, letterData, charOccurance, "b")
                     elif analysisType != "" and analysisType[0].lower() == "e":
@@ -420,16 +567,27 @@ if __name__ == "__main__":
                         statsCollected = collectStats(thisDictionary, letterData, charOccurance, "a")
                 #statsCollected = collectStats(thisDictionary, letterData, charOccurance)
                 doneAnalysis = True
-                
+            
             if score_type != "":
                 if play_type[0].lower() == "i":
                     puzzle_solution = input("Input today's five-letter Wordle solution: ")
+                    
+                    startTime = time.time() 
                     if score_type[0].lower() == "b":
                         instantWordle(thisDictionary, baseGraded, puzzle_solution, score_type)
                     if score_type[0].lower() == "e":
                         instantWordle(thisDictionary, extraGraded, puzzle_solution, score_type)
                     if score_type[0].lower() == "m":
                         instantWordle(thisDictionary, mixedGraded, puzzle_solution, score_type)
+                    if score_type[0].lower() == "r":
+                        instantWordle(thisDictionary, mixedGraded, puzzle_solution, score_type[0].lower())
+                    if score_type[0].lower() == "s":
+                        smartInstantWordle(thisDictionary, mixedGraded, puzzle_solution)
+                    executionTime = (time.time() - startTime)
+                    
+                    
+                    print('Execution time in seconds: ' + str(executionTime))
+                    
             #playWordle(thisDictionary, baseGraded, extraGraded, mixedGraded)
         else:
             break
